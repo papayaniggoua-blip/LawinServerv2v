@@ -55,9 +55,10 @@ mongoose.connect(config.mongodb.database, () => {
 });
 
 mongoose.connection.on("error", err => {
-    log.error("MongoDB failed to connect, please make sure you have MongoDB installed and running.");
-    throw err;
+    log.error("MongoDB failed to connect: " + err.message);
 });
+
+app.get("/", (req, res) => res.json({ status: "UP", service: "LawinServerV2" }));
 
 app.use(rateLimit({ windowMs: 0.5 * 60 * 1000, max: 45 }));
 app.use(express.json());
@@ -73,7 +74,12 @@ server.listen(PORT, () => {
     log.backend(`App started listening on port ${PORT}`);
 
     require("./xmpp/xmpp.js")(server, app);
-    require("./DiscordBot");
+
+    if (config.discord?.bot_token) {
+        require("./DiscordBot");
+    } else {
+        log.backend("Discord bot skipped (no bot_token in config).");
+    }
 }).on("error", async (err) => {
     if (err.code == "EADDRINUSE") {
         log.error(`Port ${PORT} is already in use!\nClosing in 3 seconds...`);
