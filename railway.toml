@@ -1,0 +1,7 @@
+[build]
+builder = "NIXPACKS"
+
+[deploy]
+startCommand = "npm start"
+healthcheckPath = "/lightswitch/api/service/Fortnite/status"
+restartPolicyType = "ON_FAILURE"
